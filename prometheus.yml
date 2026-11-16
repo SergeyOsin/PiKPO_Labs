@@ -1,0 +1,10 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'FoodService'
+    static_configs:
+      - targets: ['foodservice1:8080']
+  - job_name: 'UserService'
+    static_configs:
+      - targets: ['user-service:8080']

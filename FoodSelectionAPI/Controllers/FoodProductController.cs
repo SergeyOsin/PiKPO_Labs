@@ -1,0 +1,85 @@
+using FoodSelection.Model;
+using FoodSelection.Models;
+using FoodSelection.Services;
+using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
+
+namespace FoodSelection.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class FoodProductController : ControllerBase
+{
+    private readonly IFoodProductService _foodProductService;
+
+    public FoodProductController(IFoodProductService foodProductService) =>
+        _foodProductService = foodProductService;
+
+    [HttpGet]
+    public async Task<ActionResult<List<FoodProductResponseDto>>> GetAll() =>
+        Ok(await _foodProductService.GetAllAsync());
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<FoodProductResponseDto>> GetById(string id)
+    {
+        if (!ObjectId.TryParse(id, out _))
+            return BadRequest("Incorrect ID-format!");
+
+        var product = await _foodProductService.GetByIdAsync(id);
+
+        if (product == null)
+            return NotFound($"Product with ID {id} not found");
+
+        return Ok(product);
+    }
+
+    [HttpGet("filter")]
+    public async Task<ActionResult<List<FoodProductResponseDto>>> Filter(
+        [FromQuery] FoodProductFilterDto filter)
+    {
+        var products = await _foodProductService.FilterAsync(filter);
+        return Ok(products);
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<FoodProductResponseDto>> Create([FromBody] FoodProductCreateDto createDto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var result = await _foodProductService.CreateAsync(createDto);
+
+        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(string id, [FromBody] FoodProductResponseDto updateDto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        if (!ObjectId.TryParse(id, out _))
+            return BadRequest("Incorrect ID-format!");
+
+        var result = await _foodProductService.UpdateAsync(id, updateDto);
+        return result ? NoContent() : NotFound($"Product with ID {id} not found");
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(string id)
+    {
+        if (!ObjectId.TryParse(id, out _))
+            return BadRequest("Incorrect ID-format!");
+
+        var result = await _foodProductService.DeleteAsync(id);
+
+        return result ? Ok(new { message = "Product successfully deleted" }) : NotFound($"Product with ID {id} not found");
+    }
+
+    [HttpDelete("DeleteAll")]
+    public async Task<IActionResult> DeleteAll()
+    {
+        await _foodProductService.DeleteAllAsync();
+        return Ok(new { message = "All products are DELETED!" });
+    }
+}

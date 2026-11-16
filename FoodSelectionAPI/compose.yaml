@@ -1,0 +1,13 @@
+﻿services:
+  foodgraphql:
+    image: foodgraphql
+    build:
+      context: .
+      dockerfile: FoodGraphQL/Dockerfile
+
+  foodgraphql-1:
+    image: foodgraphql-1
+    build:
+      context: .
+      dockerfile: ../FoodGraphQL/Dockerfile
+
