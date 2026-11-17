@@ -1,12 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "pvxWcP+MkoE=",
+  "dgSpecHash": "YmyOGLThPeM=",
   "success": true,
   "projectFilePath": "/Users/sergeyosin/PiKPO_Labs/FoodSelectionAPITests/FoodSelectionAPITest.csproj",
   "expectedPackageFiles": [
     "/Users/sergeyosin/.nuget/packages/app.metrics.abstractions/4.3.0/app.metrics.abstractions.4.3.0.nupkg.sha512",
     "/Users/sergeyosin/.nuget/packages/chillicream.nitro.app/32.0.2/chillicream.nitro.app.32.0.2.nupkg.sha512",
-    "/Users/sergeyosin/.nuget/packages/confluent.kafka/2.14.0/confluent.kafka.2.14.0.nupkg.sha512",
     "/Users/sergeyosin/.nuget/packages/coverlet.collector/6.0.4/coverlet.collector.6.0.4.nupkg.sha512",
     "/Users/sergeyosin/.nuget/packages/dnsclient/1.6.1/dnsclient.1.6.1.nupkg.sha512",
     "/Users/sergeyosin/.nuget/packages/greendonut/16.7.5/greendonut.16.7.5.nupkg.sha512",
@@ -58,7 +57,6 @@
     "/Users/sergeyosin/.nuget/packages/hotchocolate.utilities.dependencyinjection/16.7.5/hotchocolate.utilities.dependencyinjection.16.7.5.nupkg.sha512",
     "/Users/sergeyosin/.nuget/packages/hotchocolate.utilities.tasks/16.7.5/hotchocolate.utilities.tasks.16.7.5.nupkg.sha512",
     "/Users/sergeyosin/.nuget/packages/hotchocolate.validation/16.7.5/hotchocolate.validation.16.7.5.nupkg.sha512",
-    "/Users/sergeyosin/.nuget/packages/librdkafka.redist/2.14.0/librdkafka.redist.2.14.0.nupkg.sha512",
     "/Users/sergeyosin/.nuget/packages/microsoft.bcl.asyncinterfaces/1.0.0/microsoft.bcl.asyncinterfaces.1.0.0.nupkg.sha512",
     "/Users/sergeyosin/.nuget/packages/microsoft.codecoverage/17.14.1/microsoft.codecoverage.17.14.1.nupkg.sha512",
     "/Users/sergeyosin/.nuget/packages/microsoft.extensions.apidescription.server/6.0.5/microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",

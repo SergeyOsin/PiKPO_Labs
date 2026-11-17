@@ -80,7 +80,6 @@ public class FoodProductService : IFoodProductService
         var product = new FoodProduct
         {
             Name = createDto.Name,
-            UserID = createDto.UserID,
             Calories = createDto.Calories,
             Protein = createDto.Protein,
             Carbs = createDto.Carbs,
@@ -126,6 +125,7 @@ public class FoodProductService : IFoodProductService
     private FoodProductResponseDto MapToResponseDto(FoodProduct product) =>
         new()
         {
+            Id = product.Id,
             Name = product.Name,
             Calories = product.Calories,
             Protein = product.Protein,
