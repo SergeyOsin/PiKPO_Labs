@@ -9,33 +9,6 @@ services:
     networks:
       - app-network
 
-  kafka:
-    image: apache/kafka:3.7.0
-    container_name: kafka
-    ports:
-      - "9092:9092"
-      - "29092:29092"
-    environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-      KAFKA_CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-    volumes:
-      - kafka_data:/var/lib/kafka/data
-    restart: unless-stopped
-    networks:
-      - app-network
-
   foodservice1:
     build:
       context: .
@@ -48,30 +21,10 @@ services:
       ASPNETCORE_ENVIRONMENT: "Development"
       MongoDbSettings__ConnectionString: "mongodb://mongo:27017"
       MongoDbSettings__DatabaseName: "FoodDB1"
-      Kafka__BootstrapServers: "kafka:29092"
     restart: unless-stopped
     depends_on:
-      - kafka
       - mongo
       - redis
-    networks:
-      - app-network
-
-  user-service:
-    build:
-      context: ./UserService
-      dockerfile: User.dockerfile
-    container_name: User-Service
-    ports:
-      - "7211:8080"
-    environment:
-      ASPNETCORE_URLS: "http://+:8080"
-      ASPNETCORE_ENVIRONMENT: "Development"
-      Kafka__BootstrapServers: "kafka:29092"
-    restart: unless-stopped
-    depends_on:
-      - kafka
-      - mongo
     networks:
       - app-network
 
@@ -98,7 +51,6 @@ services:
     container_name: food-prometheus
     depends_on:
       - foodservice1
-      - user-service
       - graphql-service
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
@@ -124,12 +76,13 @@ services:
       - "3001:3000"
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     networks:
       - app-network
 
 volumes:
   mongo_data:
-  kafka_data:
   grafana_data:
   redis_data:
 

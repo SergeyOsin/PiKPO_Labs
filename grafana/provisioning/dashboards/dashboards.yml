@@ -1,0 +1,9 @@
+apiVersion: 1
+
+providers:
+  - name: FoodGraphQL
+    orgId: 1
+    folder: FoodGraphQL
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards

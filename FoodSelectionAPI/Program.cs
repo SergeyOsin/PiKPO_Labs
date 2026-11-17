@@ -1,12 +1,9 @@
 using FoodSelection.Data;
 using FoodSelection.Models;
 using OpenTelemetry.Metrics;
-using OpenTelemetry.Trace;
 using OpenTelemetry.Resources;
 using Prometheus;
 using FoodSelection.Metrics;
-using Confluent.Kafka;
-
 using FoodSelection.Services;
 
 
@@ -26,19 +23,6 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "food-redis";
 });
 
-
-builder.Services.AddSingleton<IProducer<Null, string>>(sp =>
-{
-    var config = new ProducerConfig
-    {
-        BootstrapServers = builder.Configuration["Kafka:BootstrapServers"] ?? "kafka:29092",
-        MessageTimeoutMs = 10000
-    };
-    
-    return new ProducerBuilder<Null, string>(config).Build();
-});
-
-builder.Services.AddHostedService<KafkaConsumer>();
 
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(resourse=>resourse.
