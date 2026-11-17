@@ -69,4 +69,79 @@ public sealed class FoodProductService(MongoDbContext context, MetricService met
                 .FirstOrDefaultAsync(cancellationToken);
         });
     }
+
+    public Task<IReadOnlyDictionary<string, FoodProduct?>> GetFoodProductsByIdsAsync(
+        IReadOnlyList<string> ids,
+        CancellationToken cancellationToken)
+    {
+        return metrics.TrackOperationAsync("by_ids", async () =>
+        {
+            var products = await _foodProducts
+                .Find(product => ids.Contains(product.Id!))
+                .ToListAsync(cancellationToken);
+
+            var productsById = products.ToDictionary(
+                product => product.Id!,
+                product => (FoodProduct?)product,
+                StringComparer.OrdinalIgnoreCase);
+
+            var results = new Dictionary<string, FoodProduct?>(StringComparer.OrdinalIgnoreCase);
+            foreach (var id in ids)
+                results[id] = productsById.GetValueOrDefault(id);
+
+            return (IReadOnlyDictionary<string, FoodProduct?>)results;
+        });
+    }
+
+    public Task<FoodProduct> CreateFoodProductAsync(
+        FoodProduct product,
+        CancellationToken cancellationToken)
+    {
+        return metrics.TrackOperationAsync("create", async () =>
+        {
+            product.CreatedAt = DateTime.UtcNow;
+            await _foodProducts.InsertOneAsync(product, cancellationToken: cancellationToken);
+            return product;
+        });
+    }
+
+    public Task<FoodProduct?> UpdateFoodProductAsync(
+        string id,
+        FoodProduct product,
+        CancellationToken cancellationToken)
+    {
+        return metrics.TrackOperationAsync<FoodProduct?>("update", async () =>
+        {
+            var update = Builders<FoodProduct>.Update
+                .Set(item => item.Name, product.Name)
+                .Set(item => item.Calories, product.Calories)
+                .Set(item => item.Protein, product.Protein)
+                .Set(item => item.Carbs, product.Carbs)
+                .Set(item => item.Fats, product.Fats)
+                .Set(item => item.Category, product.Category)
+                .Set(item => item.IsVegan, product.IsVegan)
+                .Set(item => item.IsVegetarian, product.IsVegetarian);
+
+            return await _foodProducts.FindOneAndUpdateAsync(
+                item => item.Id == id,
+                update,
+                new FindOneAndUpdateOptions<FoodProduct>
+                {
+                    ReturnDocument = ReturnDocument.After
+                },
+                cancellationToken);
+        });
+    }
+
+    public Task<bool> DeleteFoodProductAsync(string id, CancellationToken cancellationToken)
+    {
+        return metrics.TrackOperationAsync("delete", async () =>
+        {
+            var result = await _foodProducts.DeleteOneAsync(
+                product => product.Id == id,
+                cancellationToken);
+
+            return result.DeletedCount > 0;
+        });
+    }
 }

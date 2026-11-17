@@ -13,13 +13,11 @@ public sealed class MetricService
         var meter = meterFactory.Create("FoodGraphQL.API");
 
         _productOperationsCounter = meter.CreateCounter<int>(
-            "foodgraphql_product_operations",
-            description: "Number of product queries by operation and outcome.");
+            "foodgraphql_product_operations");
 
         _operationDuration = meter.CreateHistogram<double>(
             "foodgraphql_product_operation_duration",
-            unit: "s",
-            description: "Duration of product queries.");
+            unit: "s");
     }
 
     public async Task<T> TrackOperationAsync<T>(string operation, Func<Task<T>> action)

@@ -1,5 +1,6 @@
 using FoodGraphQL.Data;
 using FoodGraphQL.Metrics;
+using FoodGraphQL.Mutations;
 using FoodGraphQL.Queries;
 using FoodGraphQL.Services;
 using OpenTelemetry.Metrics;
@@ -19,6 +20,7 @@ builder.Services
 builder.Services.AddSingleton<MongoDbContext>();
 builder.Services.AddSingleton<MetricService>();
 builder.Services.AddSingleton<FoodProductService>();
+builder.Services.AddDataLoader<FoodProductDataLoader>();
 
 builder.Services.AddOpenTelemetry()
     .WithMetrics(metrics =>
@@ -31,7 +33,8 @@ builder.Services.AddOpenTelemetry()
 
 builder.Services
     .AddGraphQLServer()
-    .AddQueryType<FoodProductQuery>();
+    .AddQueryType<FoodProductQuery>()
+    .AddMutationType<FoodProductMutation>();
 
 var app = builder.Build();
 
