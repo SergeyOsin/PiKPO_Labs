@@ -1,5 +1,6 @@
 using FoodGraphQL.Models;
 using FoodGraphQL.Services;
+using GreenDonut;
 using HotChocolate;
 
 namespace FoodGraphQL.Queries;
@@ -31,8 +32,8 @@ public sealed class FoodProductQuery
             cancellationToken);
 
     public Task<FoodProduct?> GetFoodProductByIdAsync(
-        [Service] FoodProductService service,
+        [Service] FoodProductDataLoader dataLoader,
         string id,
         CancellationToken cancellationToken = default) =>
-        service.GetFoodProductByIdAsync(id, cancellationToken);
+        dataLoader.LoadAsync(id, cancellationToken);
 }

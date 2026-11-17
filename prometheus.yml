@@ -2,9 +2,10 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'FoodService'
+  - job_name: 'FoodSelectionAPI'
     static_configs:
-      - targets: ['foodservice1:8080']
-  - job_name: 'UserService'
+      - targets: ['foodselection-rest-api:8080']
+  - job_name: 'FoodGraphQL'
+    metrics_path: /metrics
     static_configs:
-      - targets: ['user-service:8080']
+      - targets: ['graphql-service:8080']

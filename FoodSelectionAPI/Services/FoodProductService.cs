@@ -1,12 +1,9 @@
-﻿using Confluent.Kafka;
-using FoodSelection.Data;
+﻿using FoodSelection.Data;
 using FoodSelection.Metrics;
 using FoodSelection.Model;
 using FoodSelection.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using System.Diagnostics;
-using System.Text.Json;
 
 namespace FoodSelection.Services;
 
@@ -14,17 +11,14 @@ public class FoodProductService : IFoodProductService
 {
     private readonly IMongoCollection<FoodProduct> _foodProducts;
     private readonly MetricService _foodProductMetrics;
-    private readonly IProducer<Null, string> _kafkaProducer;
 
     public FoodProductService(
         IOptions<MongoDbSettings> contextDB, 
-        MetricService foodProductMetrics, 
-        IProducer<Null, string> kafkaProducer) 
+        MetricService foodProductMetrics)
     {
         var mongoDB = new MongoDbContext(contextDB);
         _foodProducts = mongoDB.FoodProducts;
         _foodProductMetrics = foodProductMetrics;
-        _kafkaProducer = kafkaProducer;
     }
 
     public async Task<List<FoodProductResponseDto>> GetAllAsync()
@@ -86,7 +80,6 @@ public class FoodProductService : IFoodProductService
         var product = new FoodProduct
         {
             Name = createDto.Name,
-            UserID = createDto.UserID,
             Calories = createDto.Calories,
             Protein = createDto.Protein,
             Carbs = createDto.Carbs,
@@ -98,24 +91,6 @@ public class FoodProductService : IFoodProductService
         };
 
         await _foodProducts.InsertOneAsync(product);
-
-        var kafkaEvent = new
-        {
-            Id = product.Id,
-            UserID = product.UserID
-        };
-        var json = JsonSerializer.Serialize(kafkaEvent);
-
-        try
-        {
-            await _kafkaProducer.ProduceAsync(
-                "object-created-topic", 
-                new Message<Null, string> { Value = json });
-        }
-        catch (ProduceException<Null, string> ex)
-        {
-            Console.WriteLine($"Нее удалось отправить событие создания: {ex.Error.Reason}");
-        }
 
         return MapToResponseDto(product);
     }
@@ -138,56 +113,19 @@ public class FoodProductService : IFoodProductService
 
     public async Task<bool> DeleteAsync(string id)
     {
-        var product = await _foodProducts.Find(p => p.Id == id).FirstOrDefaultAsync();
-        if (product is null) return false;
-        
         var result = await _foodProducts.DeleteOneAsync(p => p.Id == id);
-    
-        if (result.DeletedCount > 0)
-        {
-            var kafkaEvent = new
-            {
-                Id = product.Id,
-                UserID = product.UserID
-            };
-        
-            var json = JsonSerializer.Serialize(kafkaEvent);
-
-            try
-            {
-                await _kafkaProducer.ProduceAsync(
-                    "object-deleted-topic", 
-                    new Message<Null, string> { Value = json });
-            }
-            catch (ProduceException<Null, string> ex)
-            {
-                Console.WriteLine($"Не удалось отправить событие удаления: {ex.Error.Reason}");
-            }
-
-            return true;
-        }
-        return false;
+        return result.DeletedCount > 0;
     }
 
     public async Task DeleteAllAsync()
     {
         await _foodProducts.DeleteManyAsync(_ => true);
-
-        try
-        {
-            await _kafkaProducer.ProduceAsync(
-                "all-objects-deleted-topic",
-                new Message<Null, string> { Value = "{}" });
-        }
-        catch (ProduceException<Null, string> ex)
-        {
-            Console.WriteLine($"[Kafka Error] {ex.Error.Reason}");
-        }
     }
 
     private FoodProductResponseDto MapToResponseDto(FoodProduct product) =>
         new()
         {
+            Id = product.Id,
             Name = product.Name,
             Calories = product.Calories,
             Protein = product.Protein,

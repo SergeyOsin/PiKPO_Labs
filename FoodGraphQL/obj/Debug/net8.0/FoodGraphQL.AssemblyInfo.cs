@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FoodGraphQL")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cbf80623065309a7701d92591332e6cac6002b91")]
 [assembly: System.Reflection.AssemblyProductAttribute("FoodGraphQL")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FoodGraphQL")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

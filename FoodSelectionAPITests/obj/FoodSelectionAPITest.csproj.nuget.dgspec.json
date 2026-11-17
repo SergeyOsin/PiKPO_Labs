@@ -49,10 +49,6 @@
               "target": "Package",
               "version": "[4.3.0, )"
             },
-            "Confluent.Kafka": {
-              "target": "Package",
-              "version": "[2.14.0, )"
-            },
             "HotChocolate.AspNetCore": {
               "target": "Package",
               "version": "[16.7.5, )"
