@@ -1,13 +1,15 @@
 @FoodGraphQL_HostAddress = http://localhost:5013
 
+# Получить список продуктов с фильтрами и пагинацией
 POST {{FoodGraphQL_HostAddress}}/graphql
 Content-Type: application/json
 
 {
-  "query": "query { foodProducts(take: 10, isVegan: true) { id name calories category isVegan } }"
+  "query": "query { foodProducts(take: 10, isVegan: true, minCalories: 100, maxCalories: 500) { id name calories category isVegan } }"
 }
 ###
 
+# Получить продукт по ID
 POST {{FoodGraphQL_HostAddress}}/graphql
 Content-Type: application/json
 
@@ -17,4 +19,68 @@ Content-Type: application/json
     "id": "REPLACE_WITH_PRODUCT_ID"
   }
 }
+###
+
+# Создать продукт
+POST {{FoodGraphQL_HostAddress}}/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation($name: String!, $calories: Int!, $protein: Float!, $carbs: Float!, $fats: Float!, $category: String!, $isVegan: Boolean!, $isVegetarian: Boolean!) { createFoodProduct(name: $name, calories: $calories, protein: $protein, carbs: $carbs, fats: $fats, category: $category, isVegan: $isVegan, isVegetarian: $isVegetarian) { id name calories category isVegan isVegetarian createdAt } }",
+  "variables": {
+    "name": "Овсяная каша",
+    "calories": 150,
+    "protein": 5.0,
+    "carbs": 27.0,
+    "fats": 3.0,
+    "category": "Breakfast",
+    "isVegan": true,
+    "isVegetarian": true
+  }
+}
+###
+
+# Изменить продукт (подставьте ID из ответа createFoodProduct)
+POST {{FoodGraphQL_HostAddress}}/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation($id: String!, $name: String!, $calories: Int!, $protein: Float!, $carbs: Float!, $fats: Float!, $category: String!, $isVegan: Boolean!, $isVegetarian: Boolean!) { updateFoodProduct(id: $id, name: $name, calories: $calories, protein: $protein, carbs: $carbs, fats: $fats, category: $category, isVegan: $isVegan, isVegetarian: $isVegetarian) { id name calories category isVegan isVegetarian } }",
+  "variables": {
+    "id": "REPLACE_WITH_PRODUCT_ID",
+    "name": "Овсяная каша с ягодами",
+    "calories": 180,
+    "protein": 6.0,
+    "carbs": 30.0,
+    "fats": 4.0,
+    "category": "Breakfast",
+    "isVegan": true,
+    "isVegetarian": true
+  }
+}
+###
+
+# Удалить один продукт
+POST {{FoodGraphQL_HostAddress}}/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation($id: String!) { deleteFoodProduct(id: $id) }",
+  "variables": {
+    "id": "REPLACE_WITH_PRODUCT_ID"
+  }
+}
+###
+
+# Удалить все продукты из коллекции
+POST {{FoodGraphQL_HostAddress}}/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation { deleteAllFoodProducts }"
+}
+###
+
+# Посмотреть метрики Prometheus (это GET, не GraphQL mutation)
+GET {{FoodGraphQL_HostAddress}}/metrics
 ###

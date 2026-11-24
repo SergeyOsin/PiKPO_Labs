@@ -59,4 +59,9 @@ public sealed class FoodProductMutation
         string id,
         CancellationToken ct = default) =>
         service.DeleteFoodProductAsync(id, ct);
+
+    public Task<long> DeleteAllFoodProductsAsync(
+        [Service] FoodProductService service,
+        CancellationToken ct = default) =>
+        service.DeleteAllFoodProductsAsync(ct);
 }

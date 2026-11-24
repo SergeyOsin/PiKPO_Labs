@@ -7,3 +7,9 @@ providers:
     type: file
     options:
       path: /var/lib/grafana/dashboards
+  - name: ApiPerformance
+    orgId: 1
+    folder: API Performance
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards/api-performance-comparison.json
