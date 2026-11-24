@@ -1,4 +1,5 @@
 using FoodSelection.Model;
+using FoodSelection.Metrics;
 using FoodSelection.Models;
 using FoodSelection.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -11,16 +12,22 @@ namespace FoodSelection.Controllers;
 public class FoodProductController : ControllerBase
 {
     private readonly IFoodProductService _foodProductService;
+    private readonly MetricService _metrics;
 
-    public FoodProductController(IFoodProductService foodProductService) =>
+    public FoodProductController(IFoodProductService foodProductService, MetricService metrics)
+    {
         _foodProductService = foodProductService;
+        _metrics = metrics;
+    }
 
     [HttpGet]
-    public async Task<ActionResult<List<FoodProductResponseDto>>> GetAll() =>
-        Ok(await _foodProductService.GetAllAsync());
+    public Task<ActionResult<List<FoodProductResponseDto>>> GetAll() =>
+        _metrics.TrackOperationAsync<ActionResult<List<FoodProductResponseDto>>>("list", async () =>
+            Ok(await _foodProductService.GetAllAsync()));
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<FoodProductResponseDto>> GetById(string id)
+    public Task<ActionResult<FoodProductResponseDto>> GetById(string id) =>
+        _metrics.TrackOperationAsync<ActionResult<FoodProductResponseDto>>("by_id", async () =>
     {
         if (!ObjectId.TryParse(id, out _))
             return BadRequest("Incorrect ID-format!");
@@ -31,55 +38,57 @@ public class FoodProductController : ControllerBase
             return NotFound($"Product with ID {id} not found");
 
         return Ok(product);
-    }
+    });
 
     [HttpGet("filter")]
-    public async Task<ActionResult<List<FoodProductResponseDto>>> Filter(
-        [FromQuery] FoodProductFilterDto filter)
-    {
-        var products = await _foodProductService.FilterAsync(filter);
-        return Ok(products);
-    }
+    public Task<ActionResult<List<FoodProductResponseDto>>> Filter(
+        [FromQuery] FoodProductFilterDto filter) =>
+        _metrics.TrackOperationAsync<ActionResult<List<FoodProductResponseDto>>>("filter", async () =>
+            Ok(await _foodProductService.FilterAsync(filter)));
 
     [HttpPost]
-    public async Task<ActionResult<FoodProductResponseDto>> Create([FromBody] FoodProductCreateDto createDto)
-    {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+    public Task<ActionResult<FoodProductResponseDto>> Create([FromBody] FoodProductCreateDto createDto) =>
+        _metrics.TrackOperationAsync<ActionResult<FoodProductResponseDto>>("create", async () =>
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-        var result = await _foodProductService.CreateAsync(createDto);
+            var result = await _foodProductService.CreateAsync(createDto);
 
-        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
-    }
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        });
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(string id, [FromBody] FoodProductResponseDto updateDto)
-    {
-        if (!ModelState.IsValid)
-            return BadRequest(ModelState);
+    public Task<IActionResult> Update(string id, [FromBody] FoodProductResponseDto updateDto) =>
+        _metrics.TrackOperationAsync<IActionResult>("update", async () =>
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-        if (!ObjectId.TryParse(id, out _))
-            return BadRequest("Incorrect ID-format!");
+            if (!ObjectId.TryParse(id, out _))
+                return BadRequest("Incorrect ID-format!");
 
-        var result = await _foodProductService.UpdateAsync(id, updateDto);
-        return result ? NoContent() : NotFound($"Product with ID {id} not found");
-    }
+            var result = await _foodProductService.UpdateAsync(id, updateDto);
+            return result ? NoContent() : NotFound($"Product with ID {id} not found");
+        });
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(string id)
-    {
-        if (!ObjectId.TryParse(id, out _))
-            return BadRequest("Incorrect ID-format!");
+    public Task<IActionResult> Delete(string id) =>
+        _metrics.TrackOperationAsync<IActionResult>("delete", async () =>
+        {
+            if (!ObjectId.TryParse(id, out _))
+                return BadRequest("Incorrect ID-format!");
 
-        var result = await _foodProductService.DeleteAsync(id);
+            var result = await _foodProductService.DeleteAsync(id);
 
-        return result ? Ok(new { message = "Product successfully deleted" }) : NotFound($"Product with ID {id} not found");
-    }
+            return result ? Ok(new { message = "Product successfully deleted" }) : NotFound($"Product with ID {id} not found");
+        });
 
     [HttpDelete("DeleteAll")]
-    public async Task<IActionResult> DeleteAll()
-    {
-        await _foodProductService.DeleteAllAsync();
-        return Ok(new { message = "All products are DELETED!" });
-    }
+    public Task<IActionResult> DeleteAll() =>
+        _metrics.TrackOperationAsync<IActionResult>("delete_all", async () =>
+        {
+            await _foodProductService.DeleteAllAsync();
+            return Ok(new { message = "All products are DELETED!" });
+        });
 }

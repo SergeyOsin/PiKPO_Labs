@@ -144,4 +144,16 @@ public sealed class FoodProductService(MongoDbContext context, MetricService met
             return result.DeletedCount > 0;
         });
     }
+
+    public Task<long> DeleteAllFoodProductsAsync(CancellationToken cancellationToken)
+    {
+        return metrics.TrackOperationAsync("delete_all", async () =>
+        {
+            var result = await _foodProducts.DeleteManyAsync(
+                Builders<FoodProduct>.Filter.Empty,
+                cancellationToken);
+
+            return result.DeletedCount;
+        });
+    }
 }

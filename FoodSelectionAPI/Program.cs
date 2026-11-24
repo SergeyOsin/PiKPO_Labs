@@ -2,7 +2,6 @@ using FoodSelection.Data;
 using FoodSelection.Models;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
-using Prometheus;
 using FoodSelection.Metrics;
 using FoodSelection.Services;
 
@@ -31,6 +30,7 @@ builder.Services.AddOpenTelemetry()
     {
         metrics.AddPrometheusExporter();
         metrics.AddMeter("FoodSelection.API");
+        metrics.AddAspNetCoreInstrumentation();
         metrics.AddRuntimeInstrumentation();
         metrics.AddHttpClientInstrumentation();
         metrics.AddView("http.server.request.duration",
@@ -55,13 +55,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
-app.UseHttpMetrics();
-app.UseMetricServer();
 
 app.UseAuthorization();
 
-
 app.MapControllers();
+app.MapPrometheusScrapingEndpoint();
 
 app.Run();
 
